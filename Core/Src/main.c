@@ -92,24 +92,47 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint32_t prevMillis = 0;
+
+  uint8_t state = 0;
+  uint32_t prevMillisUserBtn = 0;
+  uint32_t prevMillisBlink = 0;
 
   while (1)
   {
 	  uint32_t currMillis = HAL_GetTick();
 
-	  if (currMillis - prevMillis >= 250) {
-		prevMillis = currMillis;
-		HAL_GPIO_TogglePin(GPIOD, LD6_Pin);
-	}
+	  if (
+		  HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET &&
+		  currMillis - prevMillisUserBtn >= 50
+	  ) {
+			HAL_GPIO_WritePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin, GPIO_PIN_RESET);
+
+			while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET);
+
+			prevMillisUserBtn = currMillis;
+			state = (state + 1) % 3;
+	  }
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) {
-		  HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
-	  } else {
-		  HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
+	  switch (state) {
+		case 0:
+			HAL_GPIO_WritePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin, GPIO_PIN_RESET);
+			break;
+
+		case 1:
+			if (currMillis - prevMillisBlink >= 1000) {
+				prevMillisBlink = currMillis;
+				HAL_GPIO_TogglePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin);
+			}
+			break;
+		case 2:
+			if (currMillis - prevMillisBlink >= 100) {
+				prevMillisBlink = currMillis;
+				HAL_GPIO_TogglePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin);
+			}
+			break;
 	  }
   }
   /* USER CODE END 3 */
