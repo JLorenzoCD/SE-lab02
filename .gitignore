@@ -68,3 +68,26 @@ local.properties
 .sts4-cache/
 
 # End of https://www.toptal.com/developers/gitignore/api/eclipse
+
+*.log
+
+Debug/
+Release/
+
+*.elf
+*.map
+*.bin
+*.hex
+*.srec
+*.lst
+*.o
+*.d
+*.a
+*.su
+*.crl
+
+TouchGFX/generated
+TouchGFX/build
+TouchGFX/simulator/msvs/.vs
+
+*.bak
