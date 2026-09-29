@@ -92,19 +92,24 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint32_t prevMillis = 0;
+
   while (1)
   {
+	  uint32_t currMillis = HAL_GetTick();
+
+	  if (currMillis - prevMillis >= 250) {
+		prevMillis = currMillis;
+		HAL_GPIO_TogglePin(GPIOD, LD6_Pin);
+	}
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 	  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) {
-		  HAL_Delay(50);
-
-		  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) {
-			  HAL_GPIO_TogglePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin);
-
-			  while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET);
-		}
+		  HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
+	  } else {
+		  HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 	  }
   }
   /* USER CODE END 3 */
