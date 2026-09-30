@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -86,7 +87,10 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start(&htim2);
+  __HAL_TIM_CLEAR_FLAG(&htim2, TIM_FLAG_UPDATE);
 
   /* USER CODE END 2 */
 
@@ -94,48 +98,36 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   uint8_t state = 0;
-  uint32_t prevMillisUserBtn = 0;
-  uint32_t prevMillisBlink = 0;
 
   while (1)
   {
-	  uint32_t currMillis = HAL_GetTick();
+		if (__HAL_TIM_GET_FLAG(&htim2, TIM_FLAG_UPDATE) != RESET) {
+			__HAL_TIM_CLEAR_FLAG(&htim2, TIM_FLAG_UPDATE);
 
-	  if (
-		  HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET &&
-		  currMillis - prevMillisUserBtn >= 50
-	  ) {
 			HAL_GPIO_WritePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin, GPIO_PIN_RESET);
 
-			while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET);
-
-			prevMillisUserBtn = currMillis;
-			state = (state + 1) % 3;
-	  }
-
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-	  switch (state) {
-		case 0:
-			HAL_GPIO_WritePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin, GPIO_PIN_RESET);
-			break;
-
-		case 1:
-			if (currMillis - prevMillisBlink >= 1000) {
-				prevMillisBlink = currMillis;
-				HAL_GPIO_TogglePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin);
+			switch (state) {
+				case 0:
+					HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
+					break;
+				case 1:
+					HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
+					break;
+				case 2:
+					HAL_GPIO_WritePin(GPIOD, LD5_Pin, GPIO_PIN_SET);
+					break;
+				default:
+					HAL_GPIO_WritePin(GPIOD, LD6_Pin, GPIO_PIN_SET);
+					break;
 			}
-			break;
-		case 2:
-			if (currMillis - prevMillisBlink >= 100) {
-				prevMillisBlink = currMillis;
-				HAL_GPIO_TogglePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin);
-			}
-			break;
-	  }
+
+			state = (state + 1) % 4;
+		}
+	  /* USER CODE END WHILE */
+
+	  /* USER CODE BEGIN 3 */
+	  /* USER CODE END 3 */
   }
-  /* USER CODE END 3 */
 }
 
 /**
