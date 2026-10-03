@@ -45,6 +45,8 @@
 
 /* USER CODE BEGIN PV */
 
+volatile uint8_t hasBeenPressedUserButton = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -87,9 +89,9 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM3_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim4);
 
   /* USER CODE END 2 */
 
@@ -97,13 +99,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	HAL_Delay(5000);
+	if (hasBeenPressedUserButton) {
+		hasBeenPressedUserButton = 0;
+		HAL_GPIO_TogglePin(LD6_GPIO_Port, LD6_Pin);
+	}
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	/* USER CODE END 3 */
   }
+  /* USER CODE END 3 */
 }
 
 /**
@@ -150,8 +155,20 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if (htim->Instance == TIM3) {
-		HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+	if (htim->Instance == TIM4) {
+		static uint8_t pressCounter = 0;
+
+		if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET){
+			pressCounter++;
+
+			if (pressCounter == 5) {
+				hasBeenPressedUserButton = 1;
+			}
+
+		} else {
+			pressCounter = 0;
+		}
+
 	}
 }
 
