@@ -87,46 +87,22 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start(&htim2);
-  __HAL_TIM_CLEAR_FLAG(&htim2, TIM_FLAG_UPDATE);
+  HAL_TIM_Base_Start_IT(&htim3);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-  uint8_t state = 0;
-
   while (1)
   {
-		if (__HAL_TIM_GET_FLAG(&htim2, TIM_FLAG_UPDATE) != RESET) {
-			__HAL_TIM_CLEAR_FLAG(&htim2, TIM_FLAG_UPDATE);
+	HAL_Delay(5000);
 
-			HAL_GPIO_WritePin(GPIOD, LD3_Pin|LD4_Pin|LD5_Pin|LD6_Pin, GPIO_PIN_RESET);
+    /* USER CODE END WHILE */
 
-			switch (state) {
-				case 0:
-					HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
-					break;
-				case 1:
-					HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
-					break;
-				case 2:
-					HAL_GPIO_WritePin(GPIOD, LD5_Pin, GPIO_PIN_SET);
-					break;
-				default:
-					HAL_GPIO_WritePin(GPIOD, LD6_Pin, GPIO_PIN_SET);
-					break;
-			}
-
-			state = (state + 1) % 4;
-		}
-	  /* USER CODE END WHILE */
-
-	  /* USER CODE BEGIN 3 */
-	  /* USER CODE END 3 */
+    /* USER CODE BEGIN 3 */
+	/* USER CODE END 3 */
   }
 }
 
@@ -172,6 +148,12 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM3) {
+		HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+	}
+}
 
 /* USER CODE END 4 */
 
